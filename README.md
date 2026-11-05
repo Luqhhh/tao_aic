@@ -34,11 +34,11 @@ tao_aic/
     │   └── open3dbench/
     ├── contest-data/                   # 已解压的算例、参考结果及配置
     │   └── task2/
-    ├── open3dbench-contest-runtime.tar.gz -> archives/同名文件
+    ├── open3dbench-contest-runtime.tar.gz # 与 archives/同名文件为硬链接
     └── contest-work/                   # 后续运行时由官方框架生成
 ```
 
-源码和数据保持相邻目录，以兼容官方的自动路径发现。镜像软链接兼容原始 `runtime.json` 的相对路径，官方配置内容保持原样。
+源码和数据保持相邻目录，以兼容官方的自动路径发现。镜像硬链接兼容原始 `runtime.json` 的相对路径，不额外占用一份镜像空间；官方启动器拒绝软链接，官方配置内容保持原样。
 
 ## 材料核验
 
@@ -54,9 +54,11 @@ python3 scripts/verify_assets.py
 
 ## 后续环境配置入口
 
-正式运行依赖 Linux、Docker、NVIDIA GPU；默认 Agent 还需要主机上的 Codex CLI 和 DeepSeek API 配置，主机 Python 需有 PyYAML。初始化时当前 WSL 未检测到 `docker` 命令，镜像尚未加载，也未执行模型调用和训练评估。
+安装与远程部署步骤见 [环境配置说明](docs/environment.md)。本地已创建 `.venv`（Python 3.10.12、PyYAML 6.0.3），可用 `bash scripts/contest2.sh --help` 查看官方入口。
 
-材料检查还发现 `binary_loss` 的训练矩阵包含 9 组，而当前源码要求 7 组，详见 [数据与种子说明](docs/rules.md#数据与种子)。开始训练前需解决官方包之间的版本不一致；本次保留全部原始材料。
+正式运行依赖 Linux、Docker、NVIDIA GPU；默认 Agent 还需要主机上的 Codex CLI 和 DeepSeek API 配置。当前 WSL 未安装 Docker；用户已选择远程复现。已检查的 GPUHome 普通实例不支持二级容器，尚未加载比赛镜像或运行训练评估。
+
+材料检查发现两类兼容问题：`binary_loss` 训练矩阵为 9 组而当前源码要求 7 组；两条基线的训练、验证矩阵还均因参考结果校验信息缺失而加载失败。详情见 [环境配置说明](docs/environment.md)和[规则说明](docs/rules.md)。官方原始材料保留原样。
 
 Docker 可用后，在项目根目录加载官方镜像：
 

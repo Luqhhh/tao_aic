@@ -1,0 +1,2 @@
+# Host orchestration only; GPU and EDA dependencies come from the official image.
+PyYAML==6.0.3
