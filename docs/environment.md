@@ -108,6 +108,8 @@ bash scripts/contest2.sh check --baseline binary_loss --work-root "$PWD/results/
 
 矩阵加载的首个错误是 `ValueError: Packed GNN reference authority is incomplete`。当前源码 `local_bench/packed_gnn_reference.py` 要求参考结果回执具有 `artifacts.packed_reference` 字段，并核对摘要、切分、候选快照和实现校验信息；提供的数据回执缺少该字段。此问题来自官方包之间的接口不一致，不是 Python 依赖缺失。
 
+逐组诊断进一步确认：全部 30 组还缺少 `artifacts.task`、`artifacts.reference_admission` 和候选快照；概率基线的 15 组初始候选摘要均与当前源码不符，13 组当前要求的参考摘要均与源码评分校准不符，另有两处 halo 差异。原始归档中的 90 个参考文件与解压文件逐字节一致。完整证据和官方打包入口的处理要求见 [参考结果诊断](reference-diagnosis.md)。
+
 应取得互相匹配的官方源码和数据，或由官方提供修订。本次配置不伪造参考结果校验信息、不绕过官方检查，也不自行决定七组或九组的赛事口径。PDF 与任务包差异详见 [rules.md](rules.md)。
 
 官方 `run` 会启动 Agent 演化和计费流程。复现官方初始算法的入口及范围，应在材料兼容、环境检查通过后单独确定。
