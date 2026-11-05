@@ -1,6 +1,6 @@
 # 环境配置与检查
 
-截至 2026-11-05，已完成本地 Python 环境和官方数据静态检查；远程 Docker 环境尚未就绪，未调用模型或提交训练评估。
+截至 2026-11-05，已完成远程 Docker GPU 环境、官方镜像及 EDA 工具检查，DeepSeek 鉴权和指定模型可用性检查也已通过。官方矩阵的兼容问题仍阻止完整基线启动；未调用模型生成接口或提交训练评估。
 
 ## 主机要求
 
@@ -15,13 +15,27 @@
 
 本地 WSL 总内存约 16 GiB，未达到完整评估准入条件，用户已选择远程服务器。
 
-## 已检查的远程实例
+## 远程实例
 
-已连接到用户提供的 GPUHome 实例，识别到 RTX 4090 24 GB、100 GiB cgroup 内存限额及 15 CPU 的配额。实例的 `free` 显示的是物理宿主机内存，应以 cgroup 限额判断本实例资源。
+当前使用 Ubuntu-nvidia 22.04 虚拟机，16 个逻辑 CPU、约 62 GiB 内存、RTX 4090 24 GB，项目目录为 `/home/ubuntu/tao_aic`。该实例以 systemd 启动，普通用户有 sudo 权限，可以安装主机 Docker；不再受嵌套容器限制。主机地址、SSH 私钥及密码不写入仓库。
 
-该实例没有 Docker socket，PID 1 为 `tini`，创建用户 namespace 返回 `Operation not permitted`。平台的[Docker 与容器化不可用说明](https://docs.gpuhome.cc/docs/environment/docker.html)明确说明普通实例不支持 Docker、containerd、Podman、Apptainer 等二级运行时。
+已验证的软件与运行环境：
 
-因此该实例无法直接运行当前官方评估入口。下一步需要能运行 Docker GPU 容器的主机，或平台提供的相应环境；未向该实例传输大型比赛包，也未安装 Docker。连接密码不写入仓库或部署脚本。
+| 项目 | 结果 |
+| --- | --- |
+| 主机 Python / PyYAML | 3.10.12 / 6.0.3 |
+| Docker Engine | 29.9.3，普通用户可用，systemd 开机启动 |
+| NVIDIA 驱动 / Container Toolkit | 570.153.02 / 1.20.1 |
+| Codex CLI | 0.166.0，官方启动参数可用 |
+| 官方镜像 | config ID `sha256:f2401e978e5504c11cbc048266cc088152f3d5cf0a1a5438d91933175c9b7821`，56 层全部匹配 |
+| 镜像内 PyTorch / CUDA | 1.7.1+cu110 / 11.0，RTX 4090 上反向传播通过 |
+| DREAMPlace | 实际 HPWL CUDA 算子检查通过 |
+| EDA 工具 | OpenROAD、OpenSTA、Yosys 启动检查通过；OpenSTA 3.1.0、Yosys 0.58；OpenROAD 的版本字符串为 `GITDIR-NOTFOUND` |
+| 导入后空闲磁盘 | 约 45 GiB，超过 26 GiB 准入要求 |
+
+Docker 29 使用已核验的 manifest 地址识别此镜像；官方 `runtime_images` 适配器把它映射回固定 config ID，不修改镜像。镜像内原有的 PyTorch、CUDA 和 EDA 依赖保持原样。
+
+此前检查的 GPUHome 普通实例是容器，没有 Docker socket，无法创建 namespace；其[官方说明](https://docs.gpuhome.cc/docs/environment/docker.html)也明确不支持二级运行时。未在该实例安装 Docker 或上传大型比赛包。
 
 ## 在支持 Docker 的主机部署
 
@@ -46,14 +60,34 @@ docker load -i materials/archives/open3dbench-contest-runtime.tar.gz
 
 `extract_materials.sh` 先校验原文件 SHA-256，再解压到新目录；已有解压目录时会停止，以保留现有材料。
 
-比赛 GPU 及 EDA 依赖来自固定镜像，主机只安装编排依赖。镜像 ID 和完整文件层由官方 `contest2.runtime_images` 核验。随后可以运行官方 `check`，它会执行实际 CUDA 和 DREAMPlace HPWL 算子，但不会提交候选评估或调用模型：
+比赛 GPU 及 EDA 依赖来自固定镜像，主机只安装编排依赖。先独立验证官方镜像的身份和全部文件层、PyTorch CUDA 反向传播、DREAMPlace HPWL CUDA 算子，以及容器内 OpenROAD、OpenSTA、Yosys 的版本：
+
+```bash
+.venv/bin/python scripts/check_runtime.py
+```
+
+该脚本复用官方 `contest2.runtime_images` 校验，不加载评估矩阵、不创建比赛预算账本。结果保存在 `results/environment/runtime/runtime-check.json`。
+
+随后可以运行官方 `check`，它还会验证矩阵和评分参考，但不会提交候选评估或调用模型：
 
 ```bash
 bash scripts/contest2.sh check --baseline loss_decoder --work-root "$PWD/results/environment/loss_decoder"
 bash scripts/contest2.sh check --baseline binary_loss --work-root "$PWD/results/environment/binary_loss"
 ```
 
-上述命令会在指定工作目录生成检查记录和空预算账本；当前材料兼容问题会使其无法全部通过，见下文。
+两条基线均已执行官方 `contest2.runner.main check`，在参考结果加载处以 `Packed GNN reference authority is incomplete` 停止。检查使用官方镜像地址适配器，避免 Docker 29 为同一镜像重复导入归档；未修改官方源码。结果汇总在 `results/environment/official-checks.json`，每条基线的日志在对应目录的 `check.log`。两个检查账本中的评估与模型调用记录均为 0，当前材料兼容问题见下文。
+
+## 默认 Agent 的主机工具
+
+已安装 Codex CLI 0.166.0，入口为 `~/.local/bin/codex`，完整官方 Linux 包保存在 `~/.local/share/codex/0.166.0`。该版本接受源码要求的 `--ignore-user-config` 和 `--ignore-rules` 参数，`codex exec --help` 已验证。
+
+安装方式依据 [OpenAI Docs 的 Codex CLI 说明](https://learn.chatgpt.com/docs/codex/cli)。远程下载返回 403，因此本次在本机取得官方 GitHub Release 的完整 Linux 包，对照官方发布元数据核对 SHA-256 后上传，服务器再次核对摘要再解压；未替换已有 CLI。安装包及下载记录保存在忽略的 `results/environment/` 中。
+
+官方 Agent 通过其计费网关使用 `deepseek-flash`。用户提供的 DeepSeek API key 已保存至服务器的 `~/.config/tao-aic/deepseek.key`，目录权限为 0700、文件权限为 0600，位于源码、数据和工作目录之外。密钥未写入 Git、命令参数或安装日志。
+
+`scripts/contest2.sh` 在没有显式设置密钥环境变量时，自动把上述文件路径交给官方入口；可通过 `DEEPSEEK_API_KEY`、`DEEPSEEK_API_KEY_FILE` 或官方 `--api-key-file` 参数覆盖。直接运行 `python -m contest2` 时需自行传递密钥文件路径。
+
+已通过官方 `check_provider` 的只读 `/models` 检查：鉴权有效且 `deepseek-flash` 可用。记录位于 `results/environment/provider/control/provider-preflight.json`。该检查不生成模型输出；环境准备阶段没有登录 Codex 账户或调用模型生成接口。
 
 ## 当前官方材料兼容问题
 

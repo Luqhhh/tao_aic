@@ -13,6 +13,7 @@ tao_aic/
 ├── README.md
 ├── docs/
 │   ├── rules.md                        # 当前规则、更新及材料差异
+│   ├── environment.md                  # 远程部署与检查结果
 │   └── official/
 │       ├── README.md                   # 随数据提供的原始开发说明
 │       └── 赛题2_面向3D芯片网表切分的优化目标演化.pdf
@@ -21,7 +22,12 @@ tao_aic/
 │   ├── extraction.json                 # 解压文件统计与链接检查记录
 │   └── migration.json                  # 迁移验证和源文件清理记录
 ├── scripts/
-│   └── verify_assets.py                # 校验本地原始材料
+│   ├── verify_assets.py                # 校验原始材料
+│   ├── setup_host.sh                   # Docker 和 NVIDIA 容器环境
+│   ├── extract_materials.sh            # 校验后恢复官方目录
+│   ├── check_runtime.py                # 官方镜像、CUDA 和 EDA 工具检查
+│   ├── check_materials.py              # 官方矩阵静态检查
+│   └── contest2.sh                     # 使用项目 Python 调用官方入口
 └── materials/                          # 本地保存，Git 忽略
     ├── archives/
     │   ├── contest-source.tar.gz
@@ -52,26 +58,27 @@ python3 scripts/verify_assets.py
 
 该命令只读取文件，不启动比赛评估。D 盘源目录的清理结果见 [migration.json](manifests/migration.json)，C 盘桌面的原始 PDF 保留。
 
-## 后续环境配置入口
+## 环境与官方入口
 
 安装与远程部署步骤见 [环境配置说明](docs/environment.md)。本地已创建 `.venv`（Python 3.10.12、PyYAML 6.0.3），可用 `bash scripts/contest2.sh --help` 查看官方入口。
 
-正式运行依赖 Linux、Docker、NVIDIA GPU；默认 Agent 还需要主机上的 Codex CLI 和 DeepSeek API 配置。当前 WSL 未安装 Docker；用户已选择远程复现。已检查的 GPUHome 普通实例不支持二级容器，尚未加载比赛镜像或运行训练评估。
+远程项目位于 `/home/ubuntu/tao_aic`，运行在 Ubuntu 22.04、16 CPU、约 62 GiB 内存、RTX 4090 24 GB 的虚拟机上。已配置 Docker、NVIDIA Container Toolkit、项目 Python 环境和 Codex CLI，并加载官方固定镜像。镜像 56 层、CUDA 反向传播、DREAMPlace HPWL CUDA 算子及 EDA 工具启动检查均已通过。
+
+DeepSeek 密钥保存在服务器的项目目录之外，鉴权及官方指定的 `deepseek-flash` 模型可用性检查已通过。通过 `scripts/contest2.sh` 运行时会自动使用该密钥文件路径；密钥不进入 Git。尚未调用模型生成接口或提交训练评估。
 
 材料检查发现两类兼容问题：`binary_loss` 训练矩阵为 9 组而当前源码要求 7 组；两条基线的训练、验证矩阵还均因参考结果校验信息缺失而加载失败。详情见 [环境配置说明](docs/environment.md)和[规则说明](docs/rules.md)。官方原始材料保留原样。
 
-Docker 可用后，在项目根目录加载官方镜像：
+在远程项目根目录检查运行环境：
 
 ```bash
-docker load -i materials/archives/open3dbench-contest-runtime.tar.gz
+.venv/bin/python scripts/check_runtime.py
 ```
 
-然后从官方入口检查两条基线：
+从官方入口检查两条基线：
 
 ```bash
-cd materials/contest-source/AgenticBench
-python3 -m contest2 check --baseline loss_decoder
-python3 -m contest2 check --baseline binary_loss
+bash scripts/contest2.sh check --baseline loss_decoder --work-root "$PWD/results/environment/loss_decoder"
+bash scripts/contest2.sh check --baseline binary_loss --work-root "$PWD/results/environment/binary_loss"
 ```
 
 训练、验证与 Agent 开发接口详见 [官方开发说明](docs/official/README.md)。API 密钥按官方要求放在源码、数据和工作目录之外。

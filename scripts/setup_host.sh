@@ -22,7 +22,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt_options=(-o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=1)
 apt-get "${apt_options[@]}" update
 apt-get "${apt_options[@]}" install -y --no-install-recommends ca-certificates curl gnupg python3-venv
-install -m 0755 -d /etc/apt/keyrings
+install -m 0755 -d /etc/apt/keyrings /etc/apt/sources.list.d
 curl --fail --show-error --location --retry 3 --connect-timeout 20 \
   https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 chmod 0644 /etc/apt/keyrings/docker.asc
