@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "source_directory": "/mnt/d/tao_aic/baiduwangpan/韬定律赛题/赛题2",
+  "destination_directory": "/home/lux1/tao_aic",
+  "verification": "Source and destination SHA-256 matched after copying; destination hashes and source hashes were checked again before source cleanup.",
+  "deleted_files": [
+    "/mnt/d/tao_aic/baiduwangpan/韬定律赛题/赛题2/README.md",
+    "/mnt/d/tao_aic/baiduwangpan/韬定律赛题/赛题2/contest-data.tar.gz",
+    "/mnt/d/tao_aic/baiduwangpan/韬定律赛题/赛题2/contest-source.tar.gz",
+    "/mnt/d/tao_aic/baiduwangpan/韬定律赛题/赛题2/open3dbench-contest-runtime.tar.gz"
+  ],
+  "source_directory_removed": true,
+  "retained_original_pdf": "/mnt/c/Users/lqh22/Desktop/赛题2_面向3D芯片网表切分的优化目标演化.pdf",
+  "deleted_bytes": 7877770632,
+  "completed_at_utc": "2026-11-05T11:26:10Z"
+}

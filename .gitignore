@@ -1,0 +1,33 @@
+# Official source, datasets, Docker image and generated evaluation workspaces.
+/materials/
+/contest-work/
+/results/
+/runs/
+/artifacts/
+
+# Local environments and caches.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# API credentials and machine-specific configuration.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Large archives and generated outputs.
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.log
+*.partial
+.DS_Store
+Thumbs.db

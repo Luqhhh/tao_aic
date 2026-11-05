@@ -1,0 +1,28 @@
+{
+  "extracted_at_utc": "2026-11-05T11:23:51Z",
+  "archives": [
+    {
+      "archive": "materials/archives/contest-source.tar.gz",
+      "directory": "materials/contest-source",
+      "archive_entries": 37355,
+      "extracted_entries": 37355,
+      "regular_files": 34875,
+      "symlinks": 372,
+      "hardlinks": 0,
+      "uncompressed_bytes": 2507409702,
+      "skipped_external_symlinks": []
+    },
+    {
+      "archive": "materials/archives/contest-data.tar.gz",
+      "directory": "materials/contest-data",
+      "archive_entries": 438,
+      "extracted_entries": 438,
+      "regular_files": 285,
+      "symlinks": 0,
+      "hardlinks": 0,
+      "uncompressed_bytes": 1031908095,
+      "skipped_external_symlinks": []
+    }
+  ],
+  "verification": "Every regular file was checked against its archive entry size; all archive symlinks were checked relative to their containing directory."
+}

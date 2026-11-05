@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "migrated_at_utc": "2026-11-05T11:21:45Z",
+  "files": [
+    {
+      "path": "docs/official/README.md",
+      "source_path": "/mnt/d/tao_aic/baiduwangpan/韬定律赛题/赛题2/README.md",
+      "size_bytes": 16595,
+      "sha256": "84bf41420a5ee3099647766e38730ab1fe2de5afec254e536df4f3e8ff98c6b1"
+    },
+    {
+      "path": "materials/archives/contest-data.tar.gz",
+      "source_path": "/mnt/d/tao_aic/baiduwangpan/韬定律赛题/赛题2/contest-data.tar.gz",
+      "size_bytes": 178946747,
+      "sha256": "1451d77c804d105fd4b8672f9ede82a77a64f1d27f30c544e1b4ef6991284210"
+    },
+    {
+      "path": "materials/archives/contest-source.tar.gz",
+      "source_path": "/mnt/d/tao_aic/baiduwangpan/韬定律赛题/赛题2/contest-source.tar.gz",
+      "size_bytes": 693027564,
+      "sha256": "34cda1468a7af955b8cb51f2588d5c4c70b3479629c094f5b9f0597daee848d2"
+    },
+    {
+      "path": "materials/archives/open3dbench-contest-runtime.tar.gz",
+      "source_path": "/mnt/d/tao_aic/baiduwangpan/韬定律赛题/赛题2/open3dbench-contest-runtime.tar.gz",
+      "size_bytes": 7005779726,
+      "sha256": "e023ec28d1399ef15037c0df98ae170f647df3845123a872a5798d20025c893d"
+    },
+    {
+      "path": "docs/official/赛题2_面向3D芯片网表切分的优化目标演化.pdf",
+      "source_path": "/mnt/c/Users/lqh22/Desktop/赛题2_面向3D芯片网表切分的优化目标演化.pdf",
+      "size_bytes": 358923,
+      "sha256": "fd435ab46e3f2b36ecd2e904aea4604cced03c0f20eb3ca4613b1d5bea228c4e"
+    }
+  ]
+}
